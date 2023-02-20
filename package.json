@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npx tsc -w",
     "dev": "npx nodemon",
-    "build": "tsc"
+    "build": "tsc",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "Kelvin William Chandra",
@@ -22,6 +23,7 @@
     "eslint-plugin-n": "^15.6.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
+    "prettier": "2.8.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   },
