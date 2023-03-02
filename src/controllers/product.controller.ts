@@ -1,51 +1,57 @@
 /* eslint-disable array-callback-return */
 import { type Request, type Response } from 'express'
 import { logger } from '../utils/logger'
+import { addProducToDB, getFilterProductByName, getProductById, getProductFromDB } from '../services/product.service'
 import { createProductValidation } from '../validations/product.validation'
 
-export const createProduct = (req: Request, res: Response) => {
+import { v4 as uuidv4 } from 'uuid'
+
+export const createProduct = async (req: Request, res: Response) => {
+  req.body.product_id = uuidv4()
   const { error, value } = createProductValidation(req.body)
-  if (error) {
+  try {
+    await addProducToDB(value)
+    logger.info('Success add new product')
+    return res.status(201).send({ status: true, statusCode: 201, message: 'Add product success', data: req.body })
+  } catch (error: any) {
     logger.error(error.details[0].message)
-    return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message, data: {} })
+    return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message })
   }
-  logger.info('Success add new product')
-  return res.status(200).send({ status: true, statusCode: 200, message: 'Add product success', data: req.body })
 }
 
-export const getProduct = (req: Request, res: Response) => {
-  const products = [
-    { name: 'Kaos', condition: 'good', price: 1750000 },
-    { name: 'Sepatu', condition: 'good', price: 2400000 }
-  ]
+export const getProduct = async (req: Request, res: Response) => {
+  const {
+    params: { id }
+  } = req
+  if (id) {
+    const product = await getProductById(id)
+    if (product) {
+      logger.info('Success get product data')
+      return res.status(200).send({ status: true, statusCode: 200, data: product })
+    } else {
+      logger.info('Data Not Found')
+      return res.status(404).send({ status: false, statusCode: 404, message: 'Data Not Found', data: {} })
+    }
+  } else {
+    const products: any = await getProductFromDB()
+    logger.info('Success get product data')
+    return res.status(200).send({ status: true, statusCode: 200, data: products })
+  }
+}
+// Error filter product can't get specified data
+export const filterProduct = async (req: Request, res: Response) => {
   const {
     params: { name }
   } = req
+
   if (name) {
-    const filterProduct = products.filter((product) => {
-      if (product.name === name) {
-        return product
-      }
-    })
-    if (filterProduct.length === 0) {
-      logger.info('Failed get product data')
-      return res.status(204).send({
-        status: false,
-        statusCode: '204',
-        product: filterProduct
-      })
+    const product: any = await getFilterProductByName(name)
+    if (product) {
+      logger.info('Success get product data')
+      return res.status(200).send({ status: true, statusCode: 200, data: product })
+    } else {
+      logger.info('Data Not Found')
+      return res.status(404).send({ status: false, statusCode: 404, message: 'Data Not Found', data: {} })
     }
-    logger.info('Success get product data')
-    return res.status(200).send({
-      status: true,
-      statusCode: '200',
-      product: filterProduct
-    })
   }
-  logger.info('Success get product data')
-  return res.status(200).send({
-    status: true,
-    statusCode: '200',
-    products
-  })
 }

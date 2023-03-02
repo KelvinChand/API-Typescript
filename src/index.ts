@@ -9,7 +9,7 @@ import cors from 'cors'
 import './utils/connectDB'
 
 const app: Application = express()
-const port: number = 80
+const port: number = 8080
 
 // parse body request
 app.use(bodyParser.urlencoded({ extended: false }))

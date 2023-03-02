@@ -1,8 +1,9 @@
 import { Router } from 'express'
-import { createProduct, getProduct } from '../controllers/product.controller'
+import { createProduct, filterProduct, getProduct } from '../controllers/product.controller'
 
-export const ProductRouter: Router = Router()
+export const productRouter: Router = Router()
 
-ProductRouter.get('/', getProduct)
-ProductRouter.get('/:name', getProduct)
-ProductRouter.post('/', createProduct)
+productRouter.get('/', getProduct)
+productRouter.get('/:id', getProduct)
+productRouter.get('/:name', filterProduct)
+productRouter.post('/', createProduct)

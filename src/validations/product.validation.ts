@@ -1,16 +1,13 @@
 import Joi from 'joi'
+import ProductType from '../types/product.type'
 
-interface ProductInterface {
-  name: string
-  condition: string
-  price: number
-}
-
-export const createProductValidation = (payload: string) => {
+export const createProductValidation = (payload: ProductType) => {
   const schema = Joi.object({
-    name: Joi.string().required(),
-    condition: Joi.string().allow('', null),
-    price: Joi.number().required()
+    product_id: Joi.string().required(),
+    Name: Joi.string().required(),
+    Condition: Joi.string().allow('', null),
+    Price: Joi.number().required(),
+    Size: Joi.string().required
   })
   return schema.validate(payload)
 }
