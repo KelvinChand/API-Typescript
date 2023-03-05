@@ -1,8 +1,8 @@
 /* eslint-disable array-callback-return */
 import { type Request, type Response } from 'express'
 import { logger } from '../utils/logger'
-import { addProducToDB, getFilterProductByName, getProductById, getProductFromDB } from '../services/product.service'
-import { createProductValidation } from '../validations/product.validation'
+import { addProducToDB, getFilterProductByName, getProductById, getProductFromDB, updateProductById } from '../services/product.service'
+import { createProductValidation, updateProductValidation } from '../validations/product.validation'
 
 import { v4 as uuidv4 } from 'uuid'
 
@@ -53,5 +53,25 @@ export const filterProduct = async (req: Request, res: Response) => {
       logger.info('Data Not Found')
       return res.status(404).send({ status: false, statusCode: 404, message: 'Data Not Found', data: {} })
     }
+  }
+}
+
+export const updateProduct = async (req: Request, res: Response) => {
+  const {
+    params: { id }
+  } = req
+
+  const { error, value } = updateProductValidation(req.body)
+  if (error) {
+    logger.error(error.details[0].message)
+    return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message })
+  }
+  try {
+    await updateProductById( id , value)
+    logger.info('Success update product')
+    return res.status(201).send({ status: true, statusCode: 201, message: 'Success update product', data: req.body })
+  } catch (error: any) {
+     logger.error(error.details[0].message)
+     return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message })
   }
 }

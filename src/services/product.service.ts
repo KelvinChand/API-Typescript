@@ -25,3 +25,12 @@ export const getProductById = async (id: string) => {
 export const getFilterProductByName = async (name: string) => {
   return await productModel.find({ Name: name })
 }
+
+export const updateProductById = async (id: string, payload: ProductType) => {
+  return await productModel.findOneAndUpdate(
+    {
+      product_id: id
+    },
+    { $set: payload }
+  )
+}

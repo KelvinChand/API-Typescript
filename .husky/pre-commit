@@ -2,6 +2,8 @@
 . "$(dirname "$0")/_/husky.sh"
 
 echo 'Styling , testing and building your project before committing';
+# run Prettier
+npm run format
 
 # check Prettier
 npm run check-format ||
