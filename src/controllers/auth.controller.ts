@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import { createSessionValidation, createUserValidation } from '../validations/auth.validation'
+import { createSessionValidation, createUserValidation, refreshSessionValidation } from '../validations/auth.validation'
 import { v4 as uuidv4 } from 'uuid'
 import { logger } from '../utils/logger'
 import { checkPassword, hashing } from '../utils/hashing'
 import { createUser, findUserByEmail } from '../services/auth.services'
-import { signJWT } from '../utils/jwt'
+import { signJWT, verifyJWT } from '../utils/jwt'
 
 export const registerUser = async (req: Request, res: Response) => {
   req.body.user_id = uuidv4()
@@ -34,7 +34,36 @@ export const createSession = async (req: Request, res: Response) => {
     const isValid = checkPassword(value.password, user.password)
     if (!isValid) return res.status(401).json({ status: false, statusCode: 401, message: 'Invalid Email or Password' })
     const accesToken = signJWT({ ...user }, { expiresIn: '1d' })
-    return res.status(200).json({ status: true, statusCode: 200, message: 'Login Success', data: accesToken })
+    const refreshToken = signJWT({ ...user }, { expiresIn: '1y' })
+    return res
+      .status(200)
+      .json({ status: true, statusCode: 200, message: 'Login Success', data: { accesToken, refreshToken } })
+  } catch (error: any) {
+    logger.error(error.message)
+    return res.status(422).send({ status: false, statusCode: 422, message: error.message })
+  }
+}
+
+export const refreshSession = async (req: Request, res: Response) => {
+  const { error, value } = refreshSessionValidation(req.body)
+  if (error) {
+    logger.error(error.details[0].message)
+    return res.status(422).send({ status: false, statusCode: 422, message: error.details[0].message })
+  }
+  try {
+    const { decoded }: any = verifyJWT(value.refreshToken)
+    const user = await findUserByEmail(decoded._doc.email)
+    if (!user) return false
+
+    const accessToken = signJWT(
+      {
+        ...user
+      },
+      { expiresIn: '1d' }
+    )
+    return res
+      .status(200)
+      .send({ status: true, statusCode: 200, message: 'Refresh Session Success', data: { accessToken } })
   } catch (error: any) {
     logger.error(error.message)
     return res.status(422).send({ status: false, statusCode: 422, message: error.message })
