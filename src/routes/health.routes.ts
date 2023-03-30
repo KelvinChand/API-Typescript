@@ -7,5 +7,5 @@ HealthRouter.get('/', (req: Request, res: Response, next: NextFunction) => {
   logger.info('Health check success')
   res
     .status(200)
-    .send({ status: true, statusCode: '200', data: [{ name: 'Kelvin William Chandra', condition: 'Good' }] })
+    .send({ status: true, statusCode: '200', message: 'Server Status Is Good' })
 })
